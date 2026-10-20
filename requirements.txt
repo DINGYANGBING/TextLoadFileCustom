@@ -1,0 +1,2 @@
+# No extra dependencies required.
+# folder_paths is provided by ComfyUI itself.
