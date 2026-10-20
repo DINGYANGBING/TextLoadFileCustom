@@ -18,6 +18,27 @@ import os
 
 import folder_paths
 
+try:
+    from server import PromptServer
+    from aiohttp import web
+
+    @PromptServer.instance.routes.get("/textloadfilecustom/list_txt")
+    async def list_txt_in_folder(request):
+        """List .txt files in an arbitrary folder (used by the dynamic dropdown)."""
+        folder = request.query.get("folder", "").strip()
+        if not folder or not os.path.isdir(folder):
+            return web.json_response({"files": []})
+        try:
+            files = sorted(
+                f for f in os.listdir(folder)
+                if os.path.isfile(os.path.join(folder, f)) and f.lower().endswith(".txt")
+            )
+        except Exception:
+            files = []
+        return web.json_response({"files": files, "folder": folder})
+except Exception:
+    pass
+
 
 class TextLoadFile:
     """Original RES4LYF node, kept for backward compatibility."""
