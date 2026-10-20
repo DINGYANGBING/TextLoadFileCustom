@@ -62,19 +62,20 @@ class TextLoadFileAdvanced:
                 "text_file": (sorted(files), {"text_upload": True}),
             },
             "optional": {
-                "folder_path": ("STRING", {"default": "", "forceInput": True, "multiline": False}),
-                "file_path": ("STRING", {"default": "", "forceInput": True, "multiline": False}),
+                "folder_path": ("STRING", {"default": "", "multiline": False}),
+                "file_path": ("STRING", {"default": "", "multiline": False}),
             }
         }
 
-    RETURN_TYPES = ("STRING",)
-    RETURN_NAMES = ("text",)
+    RETURN_TYPES = ("STRING", "STRING",)
+    RETURN_NAMES = ("text", "path",)
     FUNCTION = "main"
     CATEGORY = "RES4LYF/text"
     DESCRIPTION = ("Load a .txt file and output its content as a string. "
-                   "Use folder_path to pick a custom folder, or file_path to "
-                   "directly specify the full path. If both are empty, falls "
-                   "back to ComfyUI's default input directory.")
+                   "Fill folder_path to read from a custom folder, or file_path "
+                   "to specify the full path directly. Leave both empty to use "
+                   "ComfyUI's default input directory. The second output `path` "
+                   "shows the actual file that was read.")
 
     @classmethod
     def VALIDATE_INPUTS(cls, **kwargs):
@@ -83,15 +84,18 @@ class TextLoadFileAdvanced:
         return True
 
     def main(self, text_file, folder_path="", file_path=""):
+        folder_path = folder_path or ""
+        file_path = file_path or ""
+
         # 1) Highest priority: explicit full file path.
-        if file_path and file_path.strip():
+        if file_path.strip():
             text_file_path = file_path.strip()
         # 2) Manual folder: folder_path + text_file.
-        elif folder_path and folder_path.strip():
+        elif folder_path.strip():
             folder = folder_path.strip()
             if not os.path.isdir(folder):
-                print(f"Error: The folder `{folder}` cannot be found.")
-                return ("",)
+                print(f"TextLoadFileAdvanced Error: The folder `{folder}` cannot be found.")
+                return ("", folder)
             text_file_path = os.path.join(folder, text_file)
         # 3) Original behavior: ComfyUI default input directory.
         else:
@@ -99,12 +103,13 @@ class TextLoadFileAdvanced:
             text_file_path = os.path.join(input_dir, text_file)
 
         if not os.path.exists(text_file_path):
-            print(f"Error: The file `{text_file_path}` cannot be found.")
-            return ("",)
+            print(f"TextLoadFileAdvanced Error: The file `{text_file_path}` cannot be found.")
+            return ("", text_file_path)
 
         with open(text_file_path, "r", encoding="utf-8") as f:
             text = f.read()
-        return (text,)
+        print(f"TextLoadFileAdvanced loaded: {text_file_path}")
+        return (text, text_file_path)
 
 
 NODE_CLASS_MAPPINGS = {
