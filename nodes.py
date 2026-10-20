@@ -60,10 +60,10 @@ class TextLoadFileAdvanced:
         return {
             "required": {
                 "text_file": (sorted(files), {"text_upload": True}),
-            },
-            "optional": {
                 "folder_path": ("STRING", {"default": "", "multiline": False}),
                 "file_path": ("STRING", {"default": "", "multiline": False}),
+            },
+            "optional": {
             }
         }
 
